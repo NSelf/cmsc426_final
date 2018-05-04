@@ -13,8 +13,8 @@ SceneNum = 1;
 SceneName = sprintf('%0.3d', SceneNum);
 FrameNum = num2str(1);
 
-I = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_rgb.png']);
-ID = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_depth.png']);
+I = imread([Path,'frame_',SceneName,'/frames/image_',FrameNum,'_rgb.png']);
+ID = imread([Path,'frame_',SceneName,'/frames/image_',FrameNum,'_depth.png']);
 
 %% Extract 3D Point cloud
 % Inputs:
