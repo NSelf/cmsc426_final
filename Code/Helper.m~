@@ -52,19 +52,11 @@ pcshow(Pts,[r g b]/255);
 drawnow;
 title('3D Point Cloud');
 
-ransacRuns = 3;
-for i = 1:ransacRuns
-    test = ransac_point_cloud(Pts);
-    hold on;
-    plot(test{1});
-    hold off;
+test = ransac_point_cloud(Pts);
+hold on;
+plot(test{1});
+hold off;
 
-    newPts = Pts;
-    newPts(test{2}, :) = [];
+figure();
 
-    figure(),
-    pcshow(newPts);
-    drawnow;
-    title(['3D Point Cloud after ', num2str(i), ' RANSAC runs for plane']);
-    Pts = newPts;
-end
+newPts = Pts

@@ -1,0 +1,42 @@
+function [ planeInlinerIndices ] = ransac_point_cloud(pointCloud)
+
+minSample = 3;
+threshold = 2;
+maxRuns = 100;
+maxInlierCount = 0;
+bestMatch = cell(1, 2); % plane initial points, inlier indices
+for i = 1:maxRuns
+    sampleSet = pointCloud(randi([1, size(pointCloud, 1)], 1, minSample), :);
+
+    inlierIndices = [];
+    p1 = sampleSet(1, :);
+    p2 = sampleSet(2, :);
+    p3 = sampleSet(3, :);
+    normal = cross(p1-p2, p1-p3);
+    a = normal(1);
+    b = normal(2);
+    c = normal(3);
+    d = -(a*p1(1) + b*p1(2) + c*p1(3));
+    samplePlane = planeModel(a, b, c, d]);
+    for j = 1:size(pointCloud, 1)
+        dist = point_to_plane_dist(samplePlane, pointCloud(j(:)));
+        if (abs(dist) < threshold)
+            inlierIndices = [inlierIndices; j];
+        end
+    end
+    if (length(inlierIndices) > maxInlierCount)
+        bestMatch{2} = inlierIndices;
+        maxInlierCount = length(inlierIndices);
+    end
+end
+
+planeInlierIndices = bestMatch{2};
+
+end
+
+function d = point_to_plane_dist(planeObj, x, y, z)
+    [a, b, c, d] = planeObj.Parameters;
+    dist = (a*x+b*y+c*z+d) / sqrt(a^2+b^2+c^2);
+    n = [a; b; c]/norm([a; b; c]);
+    d = n.*dist;
+end
