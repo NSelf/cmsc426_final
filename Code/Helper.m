@@ -8,13 +8,13 @@ clear all
 close all
 
 %% Setup Paths and Read RGB and Depth Images
-Path = '../Data/SingleObject/'; 
+Path = '../SingleObject/'; 
 SceneNum = 1;
 SceneName = sprintf('%0.3d', SceneNum);
 FrameNum = num2str(1);
 
-I = imread([Path,'frame_',SceneName,'/frames/image_',FrameNum,'_rgb.png']);
-ID = imread([Path,'frame_',SceneName,'/frames/image_',FrameNum,'_depth.png']);
+I = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_rgb.png']);
+ID = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_depth.png']);
 
 %% Extract 3D Point cloud
 % Inputs:
@@ -54,7 +54,20 @@ title('3D Point Cloud');
 
 ransacRuns = 3;
 for i = 1:ransacRuns
-    test = ransac_point_cloud(Pts);
+    thld = 8;
+    [test, testout] = ransac_point_cloud(Pts);
+    
+    
+    MeanPt = mean(testout,2);
+    Diff = sum(bsxfun(@minus,testout,MeanPt).^2);
+    MeanPtModel = mean(Mdata,2);
+    DiffModel = sum(bsxfun(@minus,Mdata,MeanPtModel).^2);
+    Thld = max(DiffModel).*1.2;
+    testout = testout(:,Diff<=Thld);
+    
+    
+    
+    
     hold on;
     plot(test{1});
     hold off;
@@ -68,3 +81,6 @@ for i = 1:ransacRuns
     title(['3D Point Cloud after ', num2str(i), ' RANSAC runs for plane']);
     Pts = newPts;
 end
+
+
+
