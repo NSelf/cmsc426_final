@@ -52,24 +52,40 @@ pcshow(Pts,[r g b]/255);
 drawnow;
 title('3D Point Cloud');
 
-ransacRuns = 3;
-for i = 1:ransacRuns
-    test = ransac_point_cloud(Pts);
-    hold on;
-    plot(test{1});
-    hold off;
+%% Noise exclusion by radius from center of foreground
+toDel = [];
+center = [0, 0, 0];
+radius = 1200;
 
-%     center = mean(Pts);
-% 
-%     for b = 1:length(Pts)
-%         dist = sqrt(sum((center - Pts(b)) .^ 2));
-%         if dist > 1000
-%             test{2} = [test{2}; b];
-%         end
-%     end
+for i = 1:length(Pts)
+    dist = norm(Pts(i, :) - center);
+    if dist > radius
+        toDel = [toDel; i];
+    end
+end
+
+newPts = Pts;
+newPts(toDel, :) = [];
+r(toDel) = [];
+g(toDel) = [];
+b(toDel) = [];
+
+figure(),
+pcshow(newPts, [r g b]/255);
+drawnow;
+Pts = newPts;
+
+%% RANSAC for background plane removal
+toDel = [];
+ransacRuns = 2;
+for i = 1:ransacRuns
+    toDel = ransac_point_cloud(Pts);
+    hold on;
+    plot(toDel{1});
+    hold off;
     
     newPts = Pts;
-    newPts(test{2}, :) = [];
+    newPts(toDel{2}, :) = [];
 
     figure(),
     pcshow(newPts);
@@ -78,23 +94,34 @@ for i = 1:ransacRuns
     Pts = newPts;
 end
 
-todel = [];
-center = [0, 0, 0]; %mean(Pts);
 
-for b = 1:length(Pts)
-    dist = sqrt(sum((center - Pts(b)) .^ 2));
-    if dist > 250
-        todel = [todel; b];
+%% Avg distance noise suppression
+toDel = [];
+center = mean(Pts);
+dist = zeros(length(Pts), 1);
+for i = 1:length(Pts)
+    dist(i) = norm(Pts(i, :) - center);
+end
+
+std = std(dist);
+
+for i = 1:length(Pts)
+    if dist(i) > 2*std
+        toDel = [toDel; i];
     end
 end
 
 newPts = Pts;
-newPts(todel, :) = [];
+newPts(toDel, :) = [];
+r(toDel) = [];
+g(toDel) = [];
+b(toDel) = [];
 
 figure(),
 pcshow(newPts);
 drawnow;
 Pts = newPts;
+
 
 
 

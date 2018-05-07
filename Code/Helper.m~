@@ -13,8 +13,8 @@ SceneNum = 1;
 SceneName = sprintf('%0.3d', SceneNum);
 FrameNum = num2str(1);
 
-I = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_rgb.png']);
-ID = imread([Path,'scene_',SceneName,'/frames/image_',FrameNum,'_depth.png']);
+I = imread([Path,'scene_',SceneName,'/frames/frame_',FrameNum,'_rgb.png']);
+ID = imread([Path,'scene_',SceneName,'/frames/frame_',FrameNum,'_depth.png']);
 
 %% Extract 3D Point cloud
 % Inputs:
@@ -52,11 +52,64 @@ pcshow(Pts,[r g b]/255);
 drawnow;
 title('3D Point Cloud');
 
-test = ransac_point_cloud(Pts);
-hold on;
-plot(test{1});
-hold off;
+%% Noise exclusion by radius from center of foreground
+toDel = [];
+center = [0, 0, 0];
+radius = 1200;
 
-figure();
+for i = 1:length(Pts)
+    dist = norm(Pts(i, :) - center);
+    if dist > radius
+        toDel = [toDel; i];
+    else
+        dist;
+    end
+end
 
-newPts = Pts
+newPts = Pts;
+newPts(toDel, :) = [];
+r(toDel) = [];
+g(toDel) = [];
+b(toDel) = [];
+
+figure(),
+pcshow(newPts, [r g b]/255);
+drawnow;
+Pts = newPts;
+
+%% RANSAC for background plane removal
+ransacRuns = 2;
+for i = 1:ransacRuns
+    test = ransac_point_cloud(Pts);
+    hold on;
+    plot(test{1});
+    hold off;
+    
+    newPts = Pts;
+    newPts(test{2}, :) = [];
+
+    figure(),
+    pcshow(newPts);
+    drawnow;
+    title(['3D Point Cloud after ', num2str(i), ' RANSAC runs for plane']);
+    Pts = newPts;
+end
+
+
+%% Avg distance noise suppression
+
+center = mean(Pts);
+dist = zeros(length(Pts), 1);
+for i = 1:length(Pts)
+    dist(i) = norm(center - Pts(i));
+end
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,14 @@
+Time: 05/07/2018, 4:05pm
+State: commit d8573f0 from Mary
+Steps:
+
+Ran code, validated that RANSAC followed by radial exclusion provides good results.
+
+Attempted to run radial before RANSAC to speed up the process, ran into unsatisfactory results when RANSAC removed a plane of the forground.
+Changing radius so that we can change the order, improve efficiency.
+
+Changed some variable names, started the cropping of r, g, b wehnever we crop the 3D point sets so that we can use RGB data later.
+
+END RESULT: Noise suppression now perfected for scene 1, efficient runtime by doing radial exclusion, then RANSAC, then average distance point removal over 2 std.
+
+NEXT OBJECTIVEL: ICP
