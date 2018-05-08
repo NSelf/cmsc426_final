@@ -2,9 +2,10 @@ function [ planeInlierIndices ] = ransac_point_cloud(pointCloud)
 
 minSample = 3;
 threshold = 8;
-maxRuns = 500;
+maxRuns = 75;
 maxInlierCount = 0;
 bestMatch = cell(1, 2); % plane initial points, inlier indices
+planeInlierIndices = cell(1, 2);
 for i = 1:maxRuns
     sampleSet = pointCloud(randi([1, size(pointCloud, 1)], 1, minSample), :);
 
@@ -33,6 +34,7 @@ for i = 1:maxRuns
         maxInlierCount = length(inlierIndices);
     end
 end
+
 
 planeInlierIndices = bestMatch;
 
