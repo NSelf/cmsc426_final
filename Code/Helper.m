@@ -9,7 +9,7 @@ close all
 
 %% Setup Paths and Read RGB and Depth Images
 Path = '../Data/SingleObject/'; 
-SceneNum = 1;
+SceneNum = 1; %0, 1, 2, 6, 8, 12, 22, 23
 SceneName = sprintf('%0.3d', SceneNum);
 FrameNum = num2str(1);
 
@@ -27,7 +27,7 @@ ID = imread([Path,'scene_',SceneName,'/frames/frame_',FrameNum,'_depth.png']);
 % pcx, pcy, pcz    - point cloud (valid points only, in RGB camera coordinate frame)
 % r,g,b            - color of {pcx, pcy, pcz}
 % D_               - registered z image (NaN for invalid pixel) 
-% X,Y              - registered x and y image (NaN for invalid pixel)
+% X,Y              - registered x and y image (NaN for invalid pixel)`
 % validInd	   - indices of pixels that are not NaN or zero
 % NOTE:
 % - pcz equals to D_(validInd)
@@ -53,6 +53,7 @@ drawnow;
 title('3D Point Cloud');
 
 %% Noise exclusion by radius from center of foreground
+figure,
 toDel = [];
 center = [0, 0, 0];
 radius = 1200;
@@ -70,15 +71,15 @@ r(toDel) = [];
 g(toDel) = [];
 b(toDel) = [];
 
-figure(),
 pcshow(newPts, [r g b]/255);
-drawnow;
+title(['3D Point Cloud after restiction of radius = ', num2str(radius), ' from Origin.']);
 Pts = newPts;
 
 %% RANSAC for background plane removal
 toDel = [];
 ransacRuns = 2;
 for i = 1:ransacRuns
+    figure,
     toDel = ransac_point_cloud(Pts);
     hold on;
     plot(toDel{1});
@@ -87,17 +88,18 @@ for i = 1:ransacRuns
     newPts = Pts;
     newPts(toDel{2}, :) = [];
 
-    figure(),
     pcshow(newPts);
-    drawnow;
     title(['3D Point Cloud after ', num2str(i), ' RANSAC runs for plane']);
     Pts = newPts;
 end
 
 
 %% Avg distance noise suppression
+figure,
 toDel = [];
 center = mean(Pts);
+hold on;
+plot3(center(1), center(2), center(3), 'xk');
 dist = zeros(length(Pts), 1);
 for i = 1:length(Pts)
     dist(i) = norm(Pts(i, :) - center);
@@ -106,7 +108,7 @@ end
 std = std(dist);
 
 for i = 1:length(Pts)
-    if dist(i) > 2*std
+    if dist(i) > 2.75*std
         toDel = [toDel; i];
     end
 end
@@ -117,9 +119,8 @@ r(toDel) = [];
 g(toDel) = [];
 b(toDel) = [];
 
-figure(),
 pcshow(newPts);
-drawnow;
+title(['3D Point Cloud after suppressing noise >2.75 std distance from mean location of remaining points.']);
 Pts = newPts;
 
 
