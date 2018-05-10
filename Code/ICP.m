@@ -1,24 +1,42 @@
-% template for ICP
+function [R, T] = ICP(A, B, maxiter, thres)
+    
+    T = zeros(3,1);
+    R = eye(3,3);
+    
+    e = 0.001;
+    dist = 0.011;
+    k = 1;
+    
+    
+    while (k < maxiter)
+        M = KDTreeSearcher(A);
+        if(size(A,1) > size(B,1))
+            A = A(1:size(B,1), :);
+        else
+            B = B(1:size(A,1), :);
+        end
 
-function [R, t] = ICP(s, d, maxIters)
-    thresh = .001;
-    R = [1, 0, 0; 0, 1, 0; 0, 0, 1];
-    t = [0, 0, 0];
-    
-    i = 1;
-    dist = inf;
-    
-    snorm = pcnormals(s);
-    dnorm = pcnormals(d);
-    
-    while i < maxIters && dist > thresh
-        % mapping = find point to point correspondence
-        % dist = mean distance between corresponding points
-        %[R(i), t(i)] = rigid transform
-        
-       %s = R(i) * s prime + t(i)
-       R = R(i) * R
-       t = R(i) * t(i) + t
+        if(size(B,1) == 3)
+            pc = pointCloud(B');
+        else
+            pc = pointCloud(B);
+        end
+        norm = pcnormals(pc);
+        [Ri, Ti] = Point_To_Plane(A,B,norm);
+        if(size(A,1) ~= 3)
+            M1 = Ri * A';
+            A = M1 + Ti;
+            R = Ri * R;
+            T = Ri * Ti + T;
+            k = k + 1;
+            B = B';
+        else
+            M1 = Ri * A;
+            A = M1 + Ti;
+            R = Ri * R;
+            T = Ri * Ti + T;
+            k = k + 1;
+        end
     end
-    return R, t;
 end
+       
