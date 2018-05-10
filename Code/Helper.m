@@ -148,7 +148,7 @@ for fr = 1:5 %numFrames
 %             A_prime = pctransform(pctransform(A, affine3d(R)), affine3d(t));
 %             B_prime = [A_prime; B_prime];
 % 
-%             figure,
+%             figure
 %             pcshow(B_prime);
         for i = 1:size(A, 1)
             A(i,:) = t'*(R*A(i,:)');
