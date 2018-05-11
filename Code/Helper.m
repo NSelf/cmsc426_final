@@ -142,19 +142,22 @@ for fr = 1:5 %numFrames
         maxIters = 10;
         A = foregrounds{fr-1};
         B = foregrounds{fr};
+        A_prime = foregrounds{fr-1};
+        B_prime = foregrounds{fr};
         [R, t] = ICP(A, B, maxIters, 0.5);
 
         %% Morph objects
-%             A_prime = pctransform(pctransform(A, affine3d(R)), affine3d(t));
-%             B_prime = [A_prime; B_prime];
-% 
-%             figure
-%             pcshow(B_prime);
-        for i = 1:size(A, 1)
-            A(i,:) = t'*(R*A(i,:)');
-        end
-        B = [A;B];
-        figure,
-        pcshow(B);
+        A_prime = pctransform(A, affine3d(t));
+        B_prime = [A_prime; B];
+
+        figure
+        pcshow(B_prime);
+%         for i = 1:size(A, 1)
+%             A_prime(i,:) = t'*(R*A(i,:)');
+%         end
+%         B_prime = [A_prime;B];
+%         figure,
+%         pcshow(B_prime);
+        title(['Merge of ', fr-1, 'and ', fr, ' point clouds.']);
     end
 end

@@ -1,5 +1,5 @@
 function [R, T] = ICP(A, B, maxiter, thres)
-    
+ 
     T = zeros(3,1);
     R = eye(3,3);
     r = [0;0;0];
@@ -16,7 +16,9 @@ function [R, T] = ICP(A, B, maxiter, thres)
         else
             B = B(1:size(A,1), :);
         end
-
+        
+        [i,dest] = knnsearch(B,A);
+        B = B(i,:);
         pc = pointCloud(B);
         norm = pcnormals(pc);
         diff = A - B;
@@ -30,21 +32,12 @@ function [R, T] = ICP(A, B, maxiter, thres)
             totalDist = totalDist + dist;
         end
         [Ri, Ti] = Point_To_Plane(A,B,norm);
-%         if(size(A,1) ~= 3)
-%             M1 = Ri * A';
-%             A = M1 + Ti;
-%             R = Ri * R;
-%             T = Ri * Ti + T;
-%             k = k + 1;
-%             B = B';
-%         else
             M1 = Ri * A';
             A = M1 + Ti;
             A = A';
             R = Ri * R;
             T = Ri * Ti + T;
             k = k + 1;
-%         end
     end
 end
        
