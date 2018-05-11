@@ -17,23 +17,33 @@ function [R, T] = Point_To_Plane(p1, p2, norm)
     end
     Diff = p1-p2; 
     b = transpose(sum(Diff.*Normals,1)); 
-    A = [Normals(3,:).*p2(2,:)-Normals(2,:).*p2(3,:);
-         Normals(1,:).*p2(3,:)-Normals(3,:).*p2(1,:);
-         Normals(2,:).*p2(1,:)-Normals(1,:).*p2(2,:);
-         Normals]'; 
+    A1 = Normals(3,:).*p2(2,:)-Normals(2,:).*p2(3,:);
+    A2 = Normals(1,:).*p2(3,:)-Normals(3,:).*p2(1,:);
+    A3 = Normals(2,:).*p2(1,:)-Normals(1,:).*p2(2,:);
+    A = [A1;A2;A3;Normals]'; 
     
     x = A\b;
     
-    cosA = cos(x(1));
-    sinA = sin(x(1));
-    cosB = cos(x(2));
-    sinB = sin(x(2));
-    cosG = cos(x(3));
-    sinG = sin(x(3));
-        
-    R = [cosG*cosB, -sinG*cosA+cosG*sinB*sinA, sinG*sinA+cosG*sinB*cosA;
-         sinG*cosB, cosG*cosA+sinG*sinB*sinA, -cosG*sinA+sinG*sinB*cosA;
-         -sinB,cosB*sinA,cosB*cosA];
+    cosa = cos(x(1));
+    sina = sin(x(1));
+    cosb = cos(x(2));
+    sinb = sin(x(2));
+    cosg = cos(x(3));
+    sing = sin(x(3));
+    
+    a = cosg*cosb;
+    b = -sing*cosa+cosg*sinb*sina;
+    c = sing*sina+cosg*sinb*cosa;
+    d = sing*cosb;
+    e = cosg*cosa+sing*sinb*sina;
+    f = -cosg*sina+sing*sinb*cosa;
+    g = -sinb;
+    h = cosb*sina
+    i = cosb*cosa;
+    
+    R = [a, b, c;
+         d, e, f;
+         g, h, i];
     T = x(4:end);
     return;
 end
